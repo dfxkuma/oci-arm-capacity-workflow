@@ -1,0 +1,9 @@
+{
+  "compartment_id": "YOUR_COMPARTMENT_OCID",
+  "availability_domain": "YOUR_AVAILABILITY_DOMAIN",
+  "subnet_id": "YOUR_SUBNET_OCID",
+  "image_id": "YOUR_IMAGE_OCID",
+  "instance_display_name": "YOUR_INSTANCE_DISPLAY_NAME",
+  "instance_ocpus": "ocpus(maximum 4, shape: VM.Standard.A1.Flex)",
+  "instance_memory_in_gbs": "memory in gbs(maximum 24, shape: VM.Standard.A1.Flex)"
+}
