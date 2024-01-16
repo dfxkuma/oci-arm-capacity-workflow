@@ -115,6 +115,3 @@ async def workflow():
                 datetime_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 await log_hook.send(f"{datetime_string} | 예기치 못한 오류가 발생했습니다.")
                 await log_hook.send(f"```\n{str(err_data)[:1500]}```")
-
-
-asyncio.run(workflow())
