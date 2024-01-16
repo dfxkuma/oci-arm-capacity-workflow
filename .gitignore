@@ -3,6 +3,9 @@
 
 # OCI Credential Files
 .oci/
+ssh_keys/
+config.json
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
