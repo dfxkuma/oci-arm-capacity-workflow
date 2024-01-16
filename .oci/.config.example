@@ -1,0 +1,6 @@
+[DEFAULT]
+user=
+fingerprint=
+tenancy=
+region=
+key_file=./.oci/example@example.com_privkey.pem
