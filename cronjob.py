@@ -1,8 +1,8 @@
 import logging
 import asyncio
 
-from apscheduler.schedulers.background import BackgroundScheduler
-from .main import workflow
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from main import workflow
 
 
 async def job():
@@ -10,8 +10,8 @@ async def job():
     await workflow()
 
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(job, "interval", minutes=20)
+scheduler = AsyncIOScheduler()
+scheduler.add_job(job, "interval", seconds=10)
 
 scheduler.start()
 
