@@ -1,0 +1,6 @@
+version: '3.8'
+
+services:
+  oci-arm-instance-generator:
+    build: .
+    command: python main.py
