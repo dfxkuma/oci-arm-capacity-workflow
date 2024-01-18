@@ -8,8 +8,10 @@ class DiscordHook(LogHookBase):
     def __init__(self):
         self.hook = Webhook.Async(self.URL)
 
-    async def send(self, message: str):
-        await self.hook.send(content=message, username="Oracle Cloud")
+    async def send(self, *args, **kwargs):
+        if not kwargs.get("username"):
+            kwargs["username"] = "Oracle Cloud (LaunchInstance)"
+        await self.hook.send(*args, **kwargs)
 
     async def close(self):
         await self.hook.close()
