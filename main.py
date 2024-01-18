@@ -1,11 +1,18 @@
+import io
 import oci
 import json
 import logging
+import dhooks
 import asyncio
 from datetime import datetime
 
 from loghook.discord import DiscordHook
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 log_hook = DiscordHook()
 
 with open("config.json", "r", encoding="utf-8") as f:
@@ -107,11 +114,39 @@ async def workflow():
                 )
                 datetime_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 await log_hook.send(
-                    f"{datetime_string} | {local_config['instance_display_name']} 인스턴스를 생성하지 못했습니다."
+                    f"{datetime_string} | {local_config['instance_display_name']} 인스턴스를 생성하지 못했습니다. "
+                    f"(InternalError(500): VM.Standard.A1.Flex, Out of host capacity)"
                 )
+            elif err_data.status == 429 or "TooManyRequests" in err_data.code:
+                logging.warning("요청이 너무 많습니다. 1분 뒤에 다시 시작합니다. (429 TooManyRequests)")
+                datetime_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                await log_hook.send(
+                    f"{datetime_string} | 요청이 너무 많습니다. 1분 뒤에 다시 시작합니다. (429 TooManyRequests)"
+                )
+                await asyncio.sleep(60)
+                logging.info("1분 대기가 끝났습니다. 다음 작업을 시작할 준비가 되었습니다. scheduler 로그를 확인하세요.")
             else:
                 logging.warning("예기치 못한 오류가 발생했습니다.")
                 logging.error(err_data)
                 datetime_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                await log_hook.send(f"{datetime_string} | 예기치 못한 오류가 발생했습니다.")
-                await log_hook.send(f"```\n{str(err_data)[:1500]}```")
+
+                error_fp = io.StringIO()
+                error_fp.write(
+                    json.dumps(
+                        {
+                            "status": err_data.status,
+                            "code": err_data.code,
+                            "opc-request-id": err_data.request_id,
+                            "message": err_data.message,
+                            "operation_name": err_data.operation_name,
+                            "timestamp": err_data.timestamp,
+                            "request_endpoint": err_data.request_endpoint,
+                        },
+                        indent=2,
+                    )
+                )
+                error_fp.seek(0)
+                await log_hook.send(
+                    file=dhooks.File(fp=error_fp, name="error.json"),
+                    content=f"{datetime_string} | 예기치 못한 오류가 발생했습니다.",
+                )
