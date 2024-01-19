@@ -1,6 +1,6 @@
 version: '3.8'
 
 services:
-  oci-arm-instance-generator:
+  main:
     build: .
     command: python cronjob.py
