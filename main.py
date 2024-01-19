@@ -73,20 +73,20 @@ async def create_compute_instance(
 
 
 async def workflow():
-    if await exist_instance_shape("VM.Standard.A1.Flex"):
-        logging.warning("VM.Standard.A1.Flex 인스턴스가 이미 존재합니다.")
+    if await exist_instance_shape(local_config["instance_shape"]):
+        logging.warning(f"{local_config['instance_shape']} 인스턴스가 이미 존재합니다.")
         logging.warning("이제 이 프로세스를 종료해도 됩니다.")
         datetime_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        await log_hook.send(f"{datetime_string} | VM.Standard.A1.Flex 인스턴스가 이미 존재합니다.")
+        await log_hook.send(f"{datetime_string} | {local_config['instance_shape']} 인스턴스가 이미 존재합니다.")
     else:
-        with open("./ssh_keys/ssh-key-2024-01-16.key.pub", "r") as public_key_file:
+        with open("./ssh_keys/public_key.pub", "r") as public_key_file:
             public_key = public_key_file.read()
         try:
             response = await create_compute_instance(
                 compartment_id=local_config["compartment_id"],
                 availability_domain=local_config["availability_domain"],
                 display_name=local_config["instance_display_name"],
-                shape="VM.Standard.A1.Flex",
+                shape=local_config["instance_shape"],
                 subnet_id=local_config["subnet_id"],
                 image_id=local_config["image_id"],
                 memory_in_gbs=float(local_config["instance_memory_in_gbs"]),
@@ -110,12 +110,12 @@ async def workflow():
                     "%s 인스턴스를 생성하지 못했습니다.", local_config["instance_display_name"]
                 )
                 logging.warning(
-                    "InternalError(500): VM.Standard.A1.Flex 구성에 대한 용량이 부족합니다."
+                    f"InternalError(500): {local_config['instance_shape']} 구성에 대한 용량이 부족합니다."
                 )
                 datetime_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 await log_hook.send(
                     f"{datetime_string} | {local_config['instance_display_name']} 인스턴스를 생성하지 못했습니다. "
-                    f"(InternalError(500): VM.Standard.A1.Flex, Out of host capacity)"
+                    f"(InternalError(500): {local_config['instance_shape']}, Out of host capacity)"
                 )
             elif err_data.status == 429 or "TooManyRequests" in err_data.code:
                 logging.warning("요청이 너무 많습니다. 1분 뒤에 다시 시작합니다. (429 TooManyRequests)")
