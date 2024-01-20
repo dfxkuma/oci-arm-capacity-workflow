@@ -11,7 +11,7 @@ async def job():
 
 
 scheduler = AsyncIOScheduler()
-scheduler.add_job(job, "interval", seconds=10)
+scheduler.add_job(job, "interval", minutes=20)
 
 scheduler.start()
 
